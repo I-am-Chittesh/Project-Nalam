@@ -1,39 +1,29 @@
-// screens/HomeScreen.js
+// screens/DashboardScreen.js (UPDATED: Now a simple placeholder)
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
-// CRITICAL FIX: The component MUST receive the 'navigation' prop
-export default function HomeScreen({ navigation }) { 
+// We don't actually need this screen anymore, but we keep it for reference.
+// The App.js file points the 'Dashboard' stack entry to MainTabNavigator now.
+
+export default function DashboardScreen() {
     return (
-        <TouchableOpacity 
-            style={styles.container} 
-            // The onPress function calls navigation.navigate('Dashboard')
-            onPress={() => navigation.navigate('Dashboard')}
-            activeOpacity={1} 
-        >
-            <Text style={styles.title}>NALAM PROJECT</Text>
-            <Text style={styles.hint}>(Tap anywhere to start)</Text>
-        </TouchableOpacity>
+        <View style={styles.container}>
+            <Text style={styles.text}>This screen is now a Tab Container!</Text>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#003366',
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#FFFFFF',
     },
-    title: {
-        fontSize: 42,
+    text: {
+        fontSize: 20,
         fontWeight: 'bold',
-        color: '#FFFFFF',
-        letterSpacing: 2,
-    },
-    hint: {
-        marginTop: 20,
-        color: '#CCCCCC',
-        fontSize: 14,
+        color: '#888',
     }
 });

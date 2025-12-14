@@ -1,0 +1,21 @@
+Scheme_ID,Linked_Record_ID,Beneficiary_Name,Scheme_Name,Ministry,Eligibility_Logic,Status
+SCH-1001,4,Sita Verma,Pradhan Mantri Ujjwala Yojana 2.0,Petroleum & Natural Gas,Female + BPL/PHH Ration Card,ELIGIBLE
+SCH-1002,14,Kisan Bhau,Pradhan Mantri Awas Yojana (Gramin),Rural Development,Rural Resident + Houseless/Kucha House,APPROVED
+SCH-1003,26,Bimal Roy,Indira Gandhi National Old Age Pension Scheme (IGNOAPS),Rural Development,Age > 60 + BPL Status,ACTIVE
+SCH-1004,6,Aarav Singh,Poshan Abhiyaan (National Nutrition Mission),Women & Child Dev,Child < 6 Years,REGISTERED
+SCH-1005,8,Anjali Rao,ADIP Scheme (Assistance to Disabled Persons),Social Justice,Disability > 40%,ELIGIBLE
+SCH-1006,28,Damodar Das,Antyodaya Anna Yojana (AAY),Consumer Affairs,Poorest of Poor (BPL Card Holder),ACTIVE
+SCH-1007,17,Kisan Bhau,Ayushman Bharat (PM-JAY),Health & Family Welfare,SECC 2011 Data / Rural Deprivation,ACTIVE - GOLD CARD
+SCH-1008,48,Baby Gupta,Mission Indradhanush,Health & Family Welfare,Infant < 2 Years (Immunization),SCHEDULED
+SCH-1009,43,Sita Verma,Pradhan Mantri Matru Vandana Yojana,Women & Child Dev,Pregnant/Lactating Mother,APPLICATION PENDING
+SCH-1010,1,Ramesh Gupta,Delhi Mohalla Clinic Scheme,Govt of NCT Delhi,Resident of Delhi,ACCESSIBLE
+SCH-1011,21,Sunita Devi,Widow Pension Scheme,Social Justice,Divorced/Destitute + Low Income,ELIGIBLE
+SCH-1012,39,Muthu Vel,Atal Beemit Vyakti Kalyan Yojana,Labour & Employment,ESIC Insured Person,COVERED
+SCH-1013,12,Vijay Kamble,Stand Up India Scheme,Finance,SC/ST Category Entrepreneur,ELIGIBLE
+SCH-1014,34,Suresh Kumar,Mukhya Mantri Parivar Samridhi Yojana,Haryana Govt,Family Income < 1.8 Lakh,VERIFIED
+SCH-1015,16,Sita Verma,Janani Suraksha Yojana,Health & Family Welfare,Institutional Delivery (BPL/SC/ST),BENEFIT RECEIVED
+SCH-1016,33,Sunita Devi,Sukanya Samriddhi Yojana,Finance,Legal Guardian of Girl Child,ACCOUNT OPEN
+SCH-1017,26,Bimal Roy,Rashtriya Vayoshri Yojana,Social Justice,Senior Citizen (BPL) - Assistive Devices,DISTRIBUTION PENDING
+SCH-1018,46,Kisan Bhau,Swachh Bharat Mission (Gramin),Jal Shakti,IHHL (Toilet Construction) Subsidy,COMPLETED
+SCH-1019,27,Muthu Vel,One Nation One Ration Card,Consumer Affairs,Migrant Worker (TN to other states),PORTABILITY ACTIVE
+SCH-1020,40,Muthu Vel,Pradhan Mantri Suraksha Bima Yojana,Finance,Bank Account Holder (18-70 yrs),AUTO-DEBIT ACTIVE

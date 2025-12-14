@@ -1,0 +1,21 @@
+  Edu_Scheme_ID,Linked_Record_ID,Beneficiary_Name,Scheme_Name,Category,Logic_Mapping,Validity_Period
+EDU-5001,11,Rahul Nair,Central Sector Scheme of Scholarship,Education,Class 12th Score > 80 percentile,2024-2025
+EDU-5002,23,Kisan Bhau,Pradhan Mantri Kisan Samman Nidhi,Agriculture,Landholding < 2 Hectares,Perpetual
+EDU-5003,7,Karthik Raja,PM Vishwakarma Yojana,Skill Dev,OBC + Artisan/Craftsman Profile,2024-2029
+EDU-5004,38,Mohan Lal,National Apprenticeship Promotion Scheme (NAPS),Skill Dev,Unemployed Graduate,12 Months
+EDU-5005,5,Vikram Singh,Pradhan Mantri Kaushal Vikas Yojana 4.0,Skill Dev,Upskilling (Driver/Logistics),Batch 2025
+EDU-5006,24,Muthu Vel,Pradhan Mantri Shram Yogi Maandhan,Pension,Unorganized Worker + Income < 15k,Till Age 60
+EDU-5007,32,Karthik Raja,Agriculture Infrastructure Fund,Agriculture,Land Owner (Patta Holder),10 Years
+EDU-5008,13,Amit Yadav,One District One Product (ODOP),Commerce,Resident of UP (Lucknow - Chikan Work),2024-2026
+EDU-5009,17,Kisan Bhau,Pradhan Mantri Fasal Bima Yojana,Agriculture,Farmer (Kharif/Rabi Season),Season 2025
+EDU-5010,9,Rahul Nair,Pradhan Mantri Uchchatar Shiksha Protsahan (PM-USP),Education,Higher Education Aspirant,2024-2027
+EDU-5011,27,Muthu Vel,e-Shram Accidental Insurance,Social Security,Registered Unorganized Worker,Annual Renewal
+EDU-5012,19,Ramesh Gupta,Sovereign Gold Bond Scheme,Investment,Taxpayer/High Credit Score,Tranche 2025-26
+EDU-5013,10,Rahul Nair,Vidya Lakshmi Portal (Edu Loan),Finance,Student seeking Higher Ed,Application Open
+EDU-5014,35,Vikram Singh,FAME India Phase II,Transport,EV Subsidy (Commercial Vehicle),Valid till Mar 2025
+EDU-5015,31,Karthik Raja,PM e-Bus Sewa,Transport,Urban Mobility User,N/A
+EDU-5016,12,Vijay Kamble,National Fellowship for SC Students,Education,SC Category + Higher Studies,2024-2026
+EDU-5017,29,Ramesh Gupta,DigiYatra,Aviation,Passport Holder + Frequent Flyer,Active
+EDU-5018,22,Rajesh Malhotra (Bene),Svamitva Yojana,Land Record,Rural Property Owner (Inheritance),Mapping Completed
+EDU-5019,15,Rahul Nair,Skill India Mission,Skill Dev,Youth (18-25),Assessment Pending
+EDU-5020,41,Karthik Raja,PM Surya Ghar: Muft Bijli Yojana,Energy,Residential Consumer (TNEB),Application Pending

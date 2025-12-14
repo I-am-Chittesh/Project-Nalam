@@ -1,0 +1,21 @@
+Case_ID,Linked_Record_ID,Full_Name,Incident_Date,Offense_Type,IPC_Section_Act,Police_Station,Current_Status,Severity_Level
+CRM-2001,25,Vikram Singh,2024-01-15,Police Verification,N/A (Passport Re-issue),Indiranagar PS,CLEARED,None
+CRM-2002,5,Vikram Singh,2023-11-05,Traffic Violation,MV Act Sec 183 (Over Speeding),Traffic HQ Bangalore,CLOSED (Fine Paid),Low
+CRM-2003,38,Mohan Lal,2021-06-12,Public Nuisance,IPC Section 290,Bhopal City PS,DISMISSED,Low
+CRM-2004,1,Ramesh Gupta,2019-03-20,Tenant Verification,N/A (Landlord Request),Connaught Place PS,VERIFIED,None
+CRM-2005,12,Vijay Kamble,2022-09-09,Civil Dispute,Civil Procedure Code (Land Title),Pune Rural Court,SUB-JUDICE,N/A
+CRM-2006,29,Ramesh Gupta,2018-04-01,Background Check,N/A (Visa Clearance),Special Branch Delhi,CLEARED,None
+CRM-2007,47,Ramesh Gupta,2015-12-31,Drunk Driving,MV Act Sec 185,Delhi West Traffic,SUSPENDED (Expired),High
+CRM-2008,14,Kisan Bhau,2010-05-15,Rioting (Protest),IPC Section 147 (Farmers Protest),Solapur PS,ACQUITTED,Medium
+CRM-2009,41,Karthik Raja,2023-02-10,Cyber Complaint,IT Act Sec 66C (Identity Theft - Victim),Chennai Cyber Cell,UNDER INVESTIGATION,N/A
+CRM-2010,21,Sunita Devi,2020-01-20,Domestic Incident,Domestic Violence Act 2005,Noida Women Cell,SETTLED,Medium
+CRM-2011,8,Anjali Rao,2022-08-08,Lost Article,N/A (Lost Disability ID),Mysore South PS,GD ENTRY FILED,None
+CRM-2012,35,Vikram Singh,2024-02-01,Pollution Check,MV Act (PUC Expiry),Bangalore RTO,WARNING ISSUED,Low
+CRM-2013,11,Rahul Nair,2023-12-10,Character Certificate,N/A (Govt Exam Requirement),Trivandrum North,ISSUED,None
+CRM-2014,3,Sita Verma,2009-01-10,Voter ID Verification,N/A (New Registration),Mumbai South,VERIFIED,None
+CRM-2015,19,Ramesh Gupta,2022-07-15,Financial Fraud Check,N/A (High Value Transaction),Income Tax Dept,EXPLAINED,None
+CRM-2016,32,Karthik Raja,2020-05-05,Trespassing,IPC Section 447,Ponneri PS,COMPROMISED,Low
+CRM-2017,23,Kisan Bhau,2018-11-20,Loan Default Notice,SARFAESI Act,Debt Recovery Tribunal,NOTICE SERVED,Civil
+CRM-2018,48,Baby Gupta (Parents),2023-09-10,Birth Registration,Registration of Births Act,Municipal Corp Delhi,REGISTERED,None
+CRM-2019,27,Muthu Vel,2021-08-15,Covid Protocol Violation,Epidemic Diseases Act,Coimbatore PS,FINE PAID,Low
+CRM-2020,13,Amit Yadav,2022-01-10,Domicile Verification,N/A (State Govt Job),Lucknow Cantt,VERIFIED,None

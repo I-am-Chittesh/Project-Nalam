@@ -527,7 +527,7 @@ npx expo start --clear
 
 - **Documentation**: See project wiki
 - **Issue Tracker**: GitHub Issues
-- **Email Support**: support@projectnalam.com
+- **Email Support**: iamchitteshd@gmail.com
 - **Community Forum**: GitHub Discussions
 
 ---
@@ -540,11 +540,10 @@ Project Nalam is licensed under the **MIT License** - see LICENSE file for detai
 
 ## 👥 Contributors
 
-- **Frontend Team** - React Native & Expo
-- **Design Team** - Glasmorphic UI/UX
-- **Backend Team** - Supabase architecture
-- **QA Team** - Testing & optimization
-- **Product Team** - Requirements & vision
+- **Chittesh D** - Technical Developement and Frontend Developement
+- **S Maheshwar** - Research and Business Intelligence
+- **Backend Team** - Backend Architect and AI Developer
+
 
 ---
 
@@ -558,6 +557,6 @@ Special thanks to:
 
 ---
 
-**Made with ❤️ for citizen empowerment through digital innovation**
+**Made with ❤️ from CodeLanders for citizen empowerment through digital innovation**
 
 *Last Updated: December 15, 2025*

@@ -23,7 +23,7 @@ export default function HomeScreen({ navigation }) {
                         onPress={() => navigation.navigate('AIInteractive')}
                         activeOpacity={0.8}
                     >
-                        <Text style={styles.aiButtonText}>AI</Text>
+                        <Text style={styles.aiButtonText}>AI Mode</Text>
                     </TouchableOpacity>
             </ImageBackground>
         </View>
@@ -48,19 +48,26 @@ const styles = StyleSheet.create({
     ,
     aiButton: {
         position: 'absolute',
-        right: 18,
+        right: 20,
         bottom: 32,
-        backgroundColor: '#2563eb',
-        width: 56,
-        height: 56,
-        borderRadius: 28,
+        backgroundColor: 'rgba(120, 130, 145, 0.60)',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 12,
         alignItems: 'center',
         justifyContent: 'center',
-        elevation: 6,
+        borderWidth: 2,
+        borderColor: 'rgba(120, 130, 145, 0.75)',
+        elevation: 8,
+        shadowColor: '#78829191',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.30,
+        shadowRadius: 10,
     },
     aiButtonText: {
-        color: '#fff',
-        fontWeight: '700',
+        color: '#FFFFFF',
+        fontWeight: '900',
         fontSize: 16,
+        letterSpacing: 0.5,
     }
 });

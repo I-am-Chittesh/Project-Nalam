@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, TextInput } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, TextInput, Modal, ScrollView } from 'react-native';
 
 export default function DashboardScreen({ navigation }) {
     // State for the live clock
     const [currentTime, setCurrentTime] = useState(new Date());
     const [searchTerm, setSearchTerm] = useState('');
     const [compactMode, setCompactMode] = useState(false);
+    const [showNotices, setShowNotices] = useState(false);
 
     // Effect to update time every second
     useEffect(() => {
@@ -29,6 +30,12 @@ export default function DashboardScreen({ navigation }) {
     };
 
     const handleRefreshTime = () => setCurrentTime(new Date());
+
+    const noticeItems = [
+        { id: '1', title: 'PM Suraksha Bima – new premium window', tag: 'Finance' },
+        { id: '2', title: 'Solar Rooftop subsidy (Phase III)', tag: 'Energy' },
+        { id: '3', title: 'Skill uplift grants for MSMEs', tag: 'Employment' },
+    ];
 
     return (
         <ImageBackground
@@ -72,10 +79,15 @@ export default function DashboardScreen({ navigation }) {
                         <Text style={styles.infoLabel}>Pending Approvals</Text>
                         <Text style={styles.infoValue}>4</Text>
                     </View>
-                    <View style={[styles.infoCard, styles.infoCardAccent]}>
+                    <TouchableOpacity
+                        style={[styles.infoCard, styles.infoCardAccent]}
+                        activeOpacity={0.86}
+                        onPress={() => setShowNotices(true)}
+                    >
                         <Text style={styles.infoLabel}>New Notices</Text>
                         <Text style={styles.infoValue}>2</Text>
-                    </View>
+                        <Text style={styles.infoHint}>Tap to view</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Focus callout */}
@@ -190,6 +202,40 @@ export default function DashboardScreen({ navigation }) {
                     </View>
 
                 </View>
+
+                {/* Notices modal */}
+                <Modal
+                    visible={showNotices}
+                    transparent
+                    animationType="fade"
+                    onRequestClose={() => setShowNotices(false)}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalCard}>
+                            <View style={styles.modalHeader}>
+                                <Text style={styles.modalTitle}>New Schemes & Notices</Text>
+                                <TouchableOpacity onPress={() => setShowNotices(false)}>
+                                    <Text style={styles.modalClose}>Close</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <ScrollView style={styles.modalBody}>
+                                {noticeItems.map((item) => (
+                                    <View key={item.id} style={styles.modalItem}>
+                                        <Text style={styles.modalItemTitle}>{item.title}</Text>
+                                        <Text style={styles.modalItemMeta}>{item.tag}</Text>
+                                    </View>
+                                ))}
+                            </ScrollView>
+                            <TouchableOpacity
+                                style={styles.modalPrimary}
+                                activeOpacity={0.86}
+                                onPress={() => setShowNotices(false)}
+                            >
+                                <Text style={styles.modalPrimaryText}>Great, got it</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </Modal>
             </View>
         </ImageBackground>
     );
@@ -197,23 +243,23 @@ export default function DashboardScreen({ navigation }) {
 
 const styles = StyleSheet.create({
     bgImage: { flex: 1 },
-    scrim: { flex: 1, backgroundColor: 'rgba(6, 16, 30, 0.22)' },
+    scrim: { flex: 1, backgroundColor: 'rgba(6, 16, 30, 0.30)' },
     
     // Header Styles (Updated)
     header: {
-        height: 90,
+        height: 82,
         flexDirection: 'row', // Splits left and right
         justifyContent: 'space-between', // Pushes them apart
         alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.12)',
+        backgroundColor: 'rgba(255,255,255,0.14)',
         borderBottomWidth: 1,
-        borderColor: 'rgba(255,255,255,0.16)',
-        elevation: 4,
-        paddingHorizontal: 30, // Adds space from edges
+        borderColor: 'rgba(12,21,35,0.42)',
+        elevation: 2,
+        paddingHorizontal: 22, // Adds space from edges
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.25,
-        shadowRadius: 12,
+        shadowOpacity: 0.18,
+        shadowRadius: 8,
     },
     headerLeft: {
         justifyContent: 'center',
@@ -228,22 +274,22 @@ const styles = StyleSheet.create({
     // Status pills
     statusRow: {
         flexDirection: 'row',
-        marginTop: 12,
+        marginTop: 10,
         marginHorizontal: 16,
     },
     statusPill: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 8,
-        paddingHorizontal: 12,
+        paddingVertical: 7,
+        paddingHorizontal: 11,
         borderRadius: 16,
         marginRight: 8,
-        backgroundColor: 'rgba(255,255,255,0.10)',
+        backgroundColor: 'rgba(255,255,255,0.12)',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.14)',
+        borderColor: 'rgba(12,21,35,0.45)',
     },
-    statusPillPositive: { backgroundColor: 'rgba(46, 227, 187, 0.22)', borderColor: 'rgba(46, 227, 187, 0.38)' },
-    statusPillInfo: { backgroundColor: 'rgba(99, 149, 255, 0.22)', borderColor: 'rgba(99, 149, 255, 0.38)' },
+    statusPillPositive: { backgroundColor: 'rgba(46, 227, 187, 0.28)', borderColor: 'rgba(46, 227, 187, 0.5)' },
+    statusPillInfo: { backgroundColor: 'rgba(99, 149, 255, 0.28)', borderColor: 'rgba(99, 149, 255, 0.5)' },
     statusText: { color: '#FFFFFF', fontWeight: '700', letterSpacing: 0.3 },
     statusDot: {
         width: 8,
@@ -264,43 +310,44 @@ const styles = StyleSheet.create({
     utilityRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: 18,
-        marginHorizontal: 16,
+        marginTop: 14,
+        marginHorizontal: 14,
     },
     infoCard: {
         flex: 1,
-        padding: 14,
-        marginHorizontal: 6,
+        padding: 12,
+        marginHorizontal: 5,
         borderRadius: 14,
-        backgroundColor: 'rgba(255,255,255,0.08)',
+        backgroundColor: 'rgba(255,255,255,0.10)',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.12)',
+        borderColor: 'rgba(255,255,255,0.10)',
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.18,
-        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.14,
+        shadowRadius: 6,
     },
     infoLabel: { color: '#D9E2F2', fontSize: 12, letterSpacing: 0.4 },
     infoValue: { color: '#FFFFFF', fontSize: 22, fontWeight: '800', marginTop: 4 },
-    infoCardPrimary: { backgroundColor: 'rgba(46, 227, 187, 0.14)', borderColor: 'rgba(46, 227, 187, 0.35)' },
-    infoCardWarning: { backgroundColor: 'rgba(255, 193, 7, 0.14)', borderColor: 'rgba(255, 193, 7, 0.32)' },
-    infoCardAccent: { backgroundColor: 'rgba(99, 149, 255, 0.14)', borderColor: 'rgba(99, 149, 255, 0.32)' },
+    infoHint: { color: 'rgba(255,255,255,0.78)', fontSize: 11, marginTop: 4, letterSpacing: 0.3 },
+    infoCardPrimary: { backgroundColor: 'rgba(46, 227, 187, 0.18)', borderColor: 'rgba(46, 227, 187, 0.45)' },
+    infoCardWarning: { backgroundColor: 'rgba(255, 193, 7, 0.18)', borderColor: 'rgba(255, 193, 7, 0.42)' },
+    infoCardAccent: { backgroundColor: 'rgba(99, 149, 255, 0.18)', borderColor: 'rgba(99, 149, 255, 0.42)' },
 
     // Focus callout
     focusCard: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 18,
-        marginHorizontal: 16,
-        padding: 14,
+        marginTop: 16,
+        marginHorizontal: 14,
+        padding: 13,
         borderRadius: 16,
-        backgroundColor: 'rgba(255,255,255,0.10)',
+        backgroundColor: 'rgba(255,255,255,0.11)',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.14)',
+        borderColor: 'rgba(12,21,35,0.42)',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.20,
-        shadowRadius: 7,
+        shadowOpacity: 0.16,
+        shadowRadius: 6,
     },
     focusTitle: { color: '#FFFFFF', fontSize: 15, fontWeight: '800', marginBottom: 4 },
     focusBody: { color: '#D9E2F2', fontSize: 13, lineHeight: 18 },
@@ -318,6 +365,52 @@ const styles = StyleSheet.create({
         shadowRadius: 6,
     },
     focusButtonText: { color: '#FFFFFF', fontWeight: '800' },
+
+    // Modal
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.45)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 18,
+    },
+    modalCard: {
+        width: '92%',
+        maxWidth: 420,
+        backgroundColor: 'rgba(18, 26, 40, 0.80)',
+        borderRadius: 18,
+        padding: 18,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.16)',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.22,
+        shadowRadius: 14,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    modalTitle: { color: '#FFFFFF', fontSize: 16, fontWeight: '800' },
+    modalClose: { color: '#9FB4D7', fontWeight: '700' },
+    modalBody: { maxHeight: 320, marginTop: 6 },
+    modalItem: {
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255,255,255,0.08)',
+    },
+    modalItemTitle: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
+    modalItemMeta: { color: '#9FB4D7', fontSize: 12, marginTop: 2 },
+    modalPrimary: {
+        marginTop: 12,
+        paddingVertical: 12,
+        borderRadius: 12,
+        backgroundColor: 'rgba(99, 149, 255, 0.9)',
+        alignItems: 'center',
+    },
+    modalPrimaryText: { color: '#FFFFFF', fontWeight: '800', letterSpacing: 0.4 },
 
     // Interactive controls
     controlsRow: {
@@ -374,7 +467,7 @@ const styles = StyleSheet.create({
     columnsContainer: {
         flex: 1,
         flexDirection: 'row', 
-        padding: 16,
+        padding: 12,
     },
 
     // Column Styles
@@ -382,14 +475,14 @@ const styles = StyleSheet.create({
         flex: 1, 
         margin: 5,
         borderRadius: 16,
-        padding: 18,
-        elevation: 8,
+        padding: 16,
+        elevation: 6,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.30,
-        shadowRadius: 12,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.22,
+        shadowRadius: 10,
         justifyContent: 'space-between',
-        backgroundColor: 'rgba(255,255,255,0.10)',
+        backgroundColor: 'rgba(255,255,255,0.13)',
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.12)',
         borderTopWidth: 3,
@@ -397,9 +490,9 @@ const styles = StyleSheet.create({
     },
 
     // Colors
-    colJanSetu: { backgroundColor: 'rgba(14, 131, 119, 0.42)', borderColor: 'rgba(46, 227, 187, 0.42)', shadowColor: '#2ee3bb', borderTopColor: '#2ee3bb' },   
-    colDhanSeva: { backgroundColor: 'rgba(255, 172, 94, 0.38)', borderColor: 'rgba(255, 172, 94, 0.42)', shadowColor: '#ffac5e', borderTopColor: '#ffac5e' },   
-    colSevaiJannal: { backgroundColor: 'rgba(255, 107, 107, 0.36)', borderColor: 'rgba(255, 107, 107, 0.42)', shadowColor: '#ff6b6b', borderTopColor: '#ff6b6b' }, 
+    colJanSetu: { backgroundColor: 'rgba(14, 131, 119, 0.32)', borderColor: 'rgba(46, 227, 187, 0.32)', shadowColor: '#2ee3bb', borderTopColor: '#2ee3bb' },   
+    colDhanSeva: { backgroundColor: 'rgba(255, 172, 94, 0.30)', borderColor: 'rgba(255, 172, 94, 0.34)', shadowColor: '#ffac5e', borderTopColor: '#ffac5e' },   
+    colSevaiJannal: { backgroundColor: 'rgba(255, 107, 107, 0.28)', borderColor: 'rgba(255, 107, 107, 0.34)', shadowColor: '#ff6b6b', borderTopColor: '#ff6b6b' }, 
 
     // Text inside Columns
     colHeader: { alignItems: 'center', marginTop: 20 },
@@ -409,7 +502,7 @@ const styles = StyleSheet.create({
     // Buttons
     buttonContainer: { marginBottom: 40, width: '100%' },
     verticalBtn: {
-        backgroundColor: 'rgba(255,255,255,0.18)',
+        backgroundColor: 'rgba(255,255,255,0.22)',
         padding: 20,
         borderRadius: 12,
         marginVertical: 10,

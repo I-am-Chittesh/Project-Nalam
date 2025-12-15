@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView, ImageBackground } from 'react-native';
 import { supabase } from '../config/dbClient';
 
 export default function ServiceUpdateScreen({ navigation }) {
@@ -93,14 +93,20 @@ export default function ServiceUpdateScreen({ navigation }) {
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#00695C" />
-                <Text style={{marginTop: 10}}>Accessing RFID Database...</Text>
+                <ActivityIndicator size="large" color="#6395ff" />
+                <Text style={{marginTop: 10, color: '#FFFFFF'}}>Accessing RFID Database...</Text>
             </View>
         );
     }
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <ImageBackground
+            source={require('../assets/bg.png')}
+            style={styles.bgImage}
+            blurRadius={26}
+        >
+            <View style={styles.scrim}>
+                <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>Update Metadata</Text>
                 <Text style={styles.subtitle}>Jan Setu Service Portal</Text>
@@ -112,14 +118,16 @@ export default function ServiceUpdateScreen({ navigation }) {
                 <TextInput 
                     style={[styles.input, styles.disabledInput]} 
                     value={uid} 
-                    editable={false} 
+                    editable={false}
+                    placeholderTextColor="rgba(230, 241, 255, 0.6)"
                 />
 
                 <Text style={styles.label}>Name (Read Only)</Text>
                 <TextInput 
                     style={[styles.input, styles.disabledInput]} 
                     value={name} 
-                    editable={false} 
+                    editable={false}
+                    placeholderTextColor="rgba(230, 241, 255, 0.6)"
                 />
 
                 {/* EDITABLE FIELDS */}
@@ -130,6 +138,7 @@ export default function ServiceUpdateScreen({ navigation }) {
                     onChangeText={setAge} 
                     keyboardType="numeric"
                     placeholder="Update Age"
+                    placeholderTextColor="rgba(230, 241, 255, 0.45)"
                 />
 
                 <View style={styles.divider} />
@@ -143,6 +152,7 @@ export default function ServiceUpdateScreen({ navigation }) {
                     onChangeText={setPhone} 
                     keyboardType="phone-pad"
                     placeholder="Add Phone Number"
+                    placeholderTextColor="rgba(230, 241, 255, 0.45)"
                 />
 
                 <Text style={styles.label}>Address</Text>
@@ -151,6 +161,7 @@ export default function ServiceUpdateScreen({ navigation }) {
                     value={address} 
                     onChangeText={setAddress} 
                     placeholder="Add Address"
+                    placeholderTextColor="rgba(230, 241, 255, 0.45)"
                     multiline
                 />
 
@@ -162,30 +173,84 @@ export default function ServiceUpdateScreen({ navigation }) {
                     <Text style={styles.cancelText}>Cancel</Text>
                 </TouchableOpacity>
             </View>
-        </ScrollView>
+            </ScrollView>
+            </View>
+        </ImageBackground>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flexGrow: 1, backgroundColor: '#E0F2F1', padding: 20 },
-    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    bgImage: { flex: 1 },
+    scrim: { flex: 1, backgroundColor: 'rgba(6, 16, 30, 0.30)' },
     
-    header: { marginBottom: 20, alignItems: 'center' },
-    title: { fontSize: 26, fontWeight: 'bold', color: '#00695C' },
-    subtitle: { fontSize: 14, color: '#555' },
-
-    card: { backgroundColor: 'white', padding: 20, borderRadius: 15, elevation: 3 },
+    container: { flexGrow: 1, padding: 16 },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(6, 16, 30, 0.30)' },
     
-    label: { fontSize: 14, fontWeight: 'bold', color: '#333', marginBottom: 5, marginTop: 10 },
-    input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 12, fontSize: 16, backgroundColor: '#FAFAFA' },
-    disabledInput: { backgroundColor: '#E0E0E0', color: '#555', fontWeight: 'bold' },
+    header: { marginBottom: 20, alignItems: 'center', marginTop: 12, paddingHorizontal: 8 },
+    title: { fontSize: 32, fontWeight: '900', color: '#F0F4FF', letterSpacing: 1.2 },
+    subtitle: { fontSize: 14, color: '#D8DEEA', marginTop: 6 },
 
-    divider: { height: 1, backgroundColor: '#EEE', marginVertical: 20 },
-    sectionHeader: { fontSize: 16, fontWeight: 'bold', color: '#00695C', marginBottom: 10 },
+    card: { 
+        backgroundColor: 'rgba(255,255,255,0.11)',
+        padding: 18,
+        borderRadius: 18,
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.25,
+        shadowRadius: 12,
+        borderWidth: 1.5,
+        borderColor: 'rgba(12,21,35,0.50)',
+        marginBottom: 24,
+    },
+    
+    label: { fontSize: 14, fontWeight: '900', color: '#E6F1FF', marginBottom: 6, marginTop: 12, letterSpacing: 0.7 },
+    input: { 
+        borderWidth: 2,
+        borderColor: 'rgba(99, 149, 255, 0.60)',
+        borderRadius: 14,
+        padding: 15,
+        fontSize: 16,
+        backgroundColor: 'rgba(255,255,255,0.16)',
+        color: '#FFFFFF',
+        marginBottom: 8,
+        fontWeight: '700',
+    },
+    disabledInput: { 
+        backgroundColor: 'rgba(46, 227, 187, 0.20)',
+        color: '#FFFFFF',
+        fontWeight: '800',
+        borderColor: 'rgba(46, 227, 187, 0.55)',
+    },
 
-    updateBtn: { backgroundColor: '#00695C', padding: 18, borderRadius: 10, alignItems: 'center', marginTop: 20 },
-    btnText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
+    divider: { height: 2, backgroundColor: 'rgba(255,255,255,0.18)', marginVertical: 16, marginHorizontal: 0 },
+    sectionHeader: { fontSize: 17, fontWeight: '900', color: '#E6F1FF', marginBottom: 10, marginTop: 2, letterSpacing: 0.9, paddingHorizontal: 2 },
 
-    cancelBtn: { padding: 15, alignItems: 'center' },
-    cancelText: { color: '#777' }
+    updateBtn: { 
+        backgroundColor: 'rgba(46, 227, 187, 0.35)',
+        padding: 16,
+        borderRadius: 14,
+        alignItems: 'center',
+        marginTop: 16,
+        borderWidth: 1.5,
+        borderColor: 'rgba(46, 227, 187, 0.50)',
+        shadowColor: '#2ee3bb',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.30,
+        shadowRadius: 12,
+        elevation: 8,
+    },
+    btnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '900', letterSpacing: 0.7 },
+
+    cancelBtn: { 
+        padding: 16,
+        alignItems: 'center',
+        marginTop: 12,
+        marginBottom: 8,
+        borderWidth: 1.5,
+        borderColor: 'rgba(255,255,255,0.18)',
+        borderRadius: 14,
+        backgroundColor: 'rgba(255,255,255,0.09)',
+    },
+    cancelText: { color: '#D9E2F2', fontWeight: '800', letterSpacing: 0.5, fontSize: 15 }
 });

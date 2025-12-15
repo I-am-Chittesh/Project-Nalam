@@ -1,7 +1,7 @@
 # 🏛️ Project Nalam - Citizen Service Portal
 
-A modern, glassmorphic citizen service platform built with **React Native** and **Expo**, providing seamless access to government services through RFID-based identification and interactive digital workflows.
-
+A modern, inclusive platform built for providing seamless access to government services through Aadhar based authentication and interactive digital workflows.
+It ensures that all people regardless of their literacy, language, geographical situation get the same provisions from the government.
 ---
 
 ## 📋 Table of Contents

@@ -16,6 +16,7 @@ import TaxationAndFilingsScreen from './screens/TaxationAndFilingsScreen';
 // Sevai Jannal Screens
 import ServiceLandScreen from './screens/ServiceLandScreen';
 import GrievancePortalScreen from './screens/GrievancePortalScreen';
+import AIInteractiveScreen from './screens/AIInteractiveScreen';
 
 const Stack = createStackNavigator();
 
@@ -25,6 +26,7 @@ export default function App() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
+        <Stack.Screen name="AIInteractive" component={AIInteractiveScreen} />
         
         {/* Register the Service Screens */}
         <Stack.Screen name="ServiceUpdate" component={ServiceUpdateScreen} />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ImageBackground, Text } from 'react-native';
 
 export default function HomeScreen({ navigation }) {
     return (
@@ -17,6 +17,14 @@ export default function HomeScreen({ navigation }) {
                     onPress={() => navigation.navigate('Dashboard')}
                     activeOpacity={0.8} 
                 />
+
+                    <TouchableOpacity
+                        style={styles.aiButton}
+                        onPress={() => navigation.navigate('AIInteractive')}
+                        activeOpacity={0.8}
+                    >
+                        <Text style={styles.aiButtonText}>AI</Text>
+                    </TouchableOpacity>
             </ImageBackground>
         </View>
     );
@@ -36,5 +44,23 @@ const styles = StyleSheet.create({
         width: '100%',
         height: '100%',
         // No background color, no text alignment needed
+    }
+    ,
+    aiButton: {
+        position: 'absolute',
+        right: 18,
+        bottom: 32,
+        backgroundColor: '#2563eb',
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 6,
+    },
+    aiButtonText: {
+        color: '#fff',
+        fontWeight: '700',
+        fontSize: 16,
     }
 });

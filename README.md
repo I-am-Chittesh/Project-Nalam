@@ -1,7 +1,7 @@
 # 🏛️ Project Nalam - Citizen Service Portal
 
-A modern, glassmorphic citizen service platform built with **React Native** and **Expo**, providing seamless access to government services through RFID-based identification and interactive digital workflows.
-
+A modern, inclusive platform built for providing seamless access to government services through Aadhar based authentication and interactive digital workflows.
+It ensures that all people regardless of their literacy, language, geographical situation get the same provisions from the government.
 ---
 
 ## 📋 Table of Contents
@@ -24,8 +24,8 @@ A modern, glassmorphic citizen service platform built with **React Native** and 
 
 Project Nalam is an innovative citizen-centric digital governance platform designed to streamline access to essential government services. The application features:
 
-- **RFID-based identification** for seamless citizen authentication
-- **Multi-service integration** supporting Jan Setu, Dhan Seva, and Sevai Jannal
+- **Aadharidentification** for seamless citizen authentication
+- **Multilingual-service integration** supporting Jan Setu, Dhan Seva, and Sevai Jannal
 - **Modern glassmorphic UI** with professional dark theme and accent colors
 - **Real-time status tracking** for service requests and filings
 - **AI-powered assistance** for citizen queries
@@ -47,7 +47,7 @@ Project Nalam is an innovative citizen-centric digital governance platform desig
 
 ### Key Capabilities
 
-- 🔐 **RFID-Based Authentication** - Automatic citizen identification via card scanning
+- 🔐 **Aadhar Authentication** - Automatic citizen identification via card scanning
 - 📊 **Dashboard Overview** - Centralized hub showing all services at a glance
 - 📝 **Service Requests** - Create and manage new service applications
 - 💰 **Financial Records** - View tax filings and assessment history

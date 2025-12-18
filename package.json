@@ -1,0 +1,11 @@
+{
+  "name": "project-nalam",
+  "private": true,
+  "scripts": {
+    "start": "cd client && npx expo start",
+    "android": "cd client && npx expo start --android",
+    "ios": "cd client && npx expo start --ios",
+    "web": "cd client && npx expo start --web"
+  },
+  "workspaces": ["client"]
+}

@@ -1,0 +1,73 @@
+import React from 'react';
+import { View, StyleSheet, TouchableOpacity, ImageBackground, Text } from 'react-native';
+
+export default function HomeScreen({ navigation }) {
+    return (
+        <View style={styles.container}>
+            <ImageBackground 
+                source={require('../assets/bg.png')} 
+                style={styles.backgroundImage}
+                resizeMode="cover" // This makes the image fill the screen nicely
+            >
+                {/* We keep the TouchableOpacity filling the whole screen 
+                   so the user can tap anywhere to start, but it has NO text.
+                */}
+                <TouchableOpacity 
+                    style={styles.touchArea} 
+                    onPress={() => navigation.navigate('Dashboard')}
+                    activeOpacity={0.8} 
+                />
+
+                    <TouchableOpacity
+                        style={styles.aiButton}
+                        onPress={() => navigation.navigate('AIInteractive')}
+                        activeOpacity={0.8}
+                    >
+                        <Text style={styles.aiButtonText}>AI Mode</Text>
+                    </TouchableOpacity>
+            </ImageBackground>
+        </View>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    backgroundImage: {
+        flex: 1,
+        width: '100%',
+        height: '100%',
+    },
+    touchArea: {
+        flex: 1,
+        width: '100%',
+        height: '100%',
+        // No background color, no text alignment needed
+    }
+    ,
+    aiButton: {
+        position: 'absolute',
+        right: 20,
+        bottom: 32,
+        backgroundColor: 'rgba(120, 130, 145, 0.60)',
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: 'rgba(120, 130, 145, 0.75)',
+        elevation: 8,
+        shadowColor: '#78829191',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.30,
+        shadowRadius: 10,
+    },
+    aiButtonText: {
+        color: '#FFFFFF',
+        fontWeight: '900',
+        fontSize: 16,
+        letterSpacing: 0.5,
+    }
+});

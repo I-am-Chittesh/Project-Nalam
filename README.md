@@ -547,7 +547,7 @@ Project Nalam is licensed under the **MIT License** - see LICENSE file for detai
 
 ---
 
-## 🙏 Acknowledgments
+## 🙏 Acknowledgments\
 
 Special thanks to:
 -Parents, Family and Friends

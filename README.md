@@ -550,6 +550,7 @@ Project Nalam is licensed under the **MIT License** - see LICENSE file for detai
 ## 🙏 Acknowledgments
 
 Special thanks to:
+-Parents, Family and Friends
 - Supabase for excellent backend infrastructure
 - Expo for seamless React Native development
 - React Navigation for robust routing

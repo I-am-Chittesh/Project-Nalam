@@ -7,7 +7,7 @@ import os
 import json
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import google.genai as genai
+import google.generativeai as genai
 from sqlalchemy import create_engine, text
 
 # ============================================================================

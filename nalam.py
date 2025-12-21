@@ -7,6 +7,7 @@ import google.generativeai as genai
 from sqlalchemy import create_engine, text
 from gtts import gTTS
 
+
 # ==============================================================================
 # SECTION 1: CONFIGURATION
 # ==============================================================================

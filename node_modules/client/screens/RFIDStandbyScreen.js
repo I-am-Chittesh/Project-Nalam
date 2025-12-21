@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Text, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 
-const API_BASE_URL = 'http://192.168.1.100:5000'; // Change this to your iPad's IP
-const RFID_RECEIVER_PORT = 8081; // Local port to receive RFID data from ESP32
+// Backend API configuration
+const API_BASE_URL = 'http://10.182.43.47:5000'; // Windows PC IP address
+const RFID_RECEIVER_PORT = 8081;
 
 export default function RFIDStandbyScreen({ navigation }) {
   const [isListening, setIsListening] = useState(false);
@@ -22,6 +23,21 @@ export default function RFIDStandbyScreen({ navigation }) {
 
   const initializeRFIDReceiver = async () => {
     try {
+      // Get WiFi info without blocking
+      setTimeout(async () => {
+        try {
+          const wifiState = await NetInfo.fetch();
+          if (wifiState.isConnected && wifiState.details?.ssid) {
+            setWifiSSID(wifiState.details.ssid);
+          } else {
+            setWifiSSID('Network Connected');
+          }
+        } catch (error) {
+          console.log('WiFi info fetch error:', error);
+          setWifiSSID('Network Connected');
+        }
+      }, 100);
+
       setStatusMessage('Connected to WiFi\nWaiting for RFID scan...');
       setIsListening(true);
       startRFIDPolling();
@@ -87,6 +103,15 @@ export default function RFIDStandbyScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.backButtonText}>← Back</Text>
+      </TouchableOpacity>
+
       <View style={styles.card}>
         <Text style={styles.title}>📱 RFID Standby Mode</Text>
         
@@ -137,6 +162,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: '#6366f1',
+    borderRadius: 8,
+    zIndex: 100,
+  },
+  backButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   card: {
     backgroundColor: 'white',

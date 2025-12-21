@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 // Import all your screens
 import HomeScreen from './screens/HomeScreen';
 import DashboardScreen from './screens/DashboardScreen';
+import RFIDStandbyScreen from './screens/RFIDStandbyScreen';
 
 // Jan Setu Screens
 import ServiceUpdateScreen from './screens/ServiceUpdateScreen';
@@ -25,6 +26,7 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="RFIDStandby" component={RFIDStandbyScreen} />
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
         <Stack.Screen name="AIInteractive" component={AIInteractiveScreen} />
         

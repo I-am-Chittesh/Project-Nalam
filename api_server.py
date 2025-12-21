@@ -523,6 +523,71 @@ def set_language_preference():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# ============================================================================
+# RFID ENDPOINTS
+# ============================================================================
+
+@app.route('/api/rfid/process', methods=['POST'])
+def process_rfid():
+    """
+    Receive RFID UID from ESP32, check if exists in rfid table.
+    If not, create a dummy entry. Return the RFID data for processing.
+    
+    Request: { "rfid_uid": "A1B2C3D4E5F6" }
+    Response: { "success": true, "rfid_uid": "...", "citizen_id": "...", "is_new": true/false }
+    """
+    try:
+        data = request.get_json()
+        rfid_uid = data.get('rfid_uid', '').strip()
+        
+        if not rfid_uid:
+            return jsonify({'success': False, 'error': 'No RFID UID provided'}), 400
+        
+        # Check if RFID exists in the rfid table
+        with engine.connect() as conn:
+            result = conn.execute(text(
+                "SELECT * FROM rfid WHERE rfid_uid = :uid LIMIT 1"
+            ), {"uid": rfid_uid})
+            existing = result.fetchone()
+            
+            if existing:
+                # RFID exists - return the existing data
+                return jsonify({
+                    'success': True,
+                    'rfid_uid': rfid_uid,
+                    'citizen_id': existing[1] if len(existing) > 1 else None,
+                    'is_new': False,
+                    'data': dict(existing._mapping) if hasattr(existing, '_mapping') else {}
+                }), 200
+            else:
+                # RFID doesn't exist - create a dummy entry
+                citizen_id = f"CITIZEN_{rfid_uid}"
+                insert_query = text("""
+                    INSERT INTO rfid (rfid_uid, citizen_id, created_at)
+                    VALUES (:uid, :citizen_id, NOW())
+                    RETURNING *
+                """)
+                
+                result = conn.execute(insert_query, {
+                    "uid": rfid_uid,
+                    "citizen_id": citizen_id
+                })
+                conn.commit()
+                new_entry = result.fetchone()
+                
+                return jsonify({
+                    'success': True,
+                    'rfid_uid': rfid_uid,
+                    'citizen_id': citizen_id,
+                    'is_new': True,
+                    'message': 'New RFID entry created',
+                    'data': dict(new_entry._mapping) if hasattr(new_entry, '_mapping') else {}
+                }), 201
+    
+    except Exception as e:
+        print(f"❌ RFID processing error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 if __name__ == '__main__':
     print("🚀 Starting Nalam Enhanced API Server...")
     print("\nAvailable endpoints:")
@@ -530,5 +595,6 @@ if __name__ == '__main__':
     print("  POST /api/chat                    - Main chat endpoint with AI & DB integration")
     print("  POST /api/synthesize-audio        - Text-to-speech endpoint")
     print("  POST /api/language-preference     - Set language preference")
+    print("  POST /api/rfid/process            - Process RFID UID from ESP32")
     print("\nServer running on http://0.0.0.0:5000")
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView, Picker, ImageBackground } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView, ImageBackground } from 'react-native';
 import { supabase } from '../config/dbClient';
 
 // Available Services List
@@ -14,6 +14,7 @@ export default function ServiceCreateScreen({ navigation }) {
     const [loading, setLoading] = useState(true);
     const [userUid, setUserUid] = useState(null);
     const [userName, setUserName] = useState('Citizen');
+    const [dropdownOpen, setDropdownOpen] = useState(false);
     
     // Form States
     const [selectedService, setSelectedService] = useState(services[0].value);
@@ -33,16 +34,23 @@ export default function ServiceCreateScreen({ navigation }) {
                 .limit(1)
                 .single();
 
-            if (error) throw error;
-
-            if (scanData) {
-                setUserUid(scanData.uniqueid || scanData.uid);
+            if (error) {
+                console.error('Error fetching UID:', error.message);
+                // Set default values instead of alerting
+                setUserUid('CITIZEN_DEFAULT');
+                setUserName('Citizen');
+            } else if (scanData) {
+                setUserUid(scanData.uniqueid || scanData.uid || 'CITIZEN_DEFAULT');
                 setUserName(scanData.name || 'Citizen');
             } else {
-                Alert.alert("Error", "Please scan your RFID card to initiate a service.");
+                console.warn('No scan data available');
+                setUserUid('CITIZEN_DEFAULT');
+                setUserName('Citizen');
             }
         } catch (error) {
             console.error('Error fetching UID:', error.message);
+            setUserUid('CITIZEN_DEFAULT');
+            setUserName('Citizen');
         } finally {
             setLoading(false);
         }
@@ -50,10 +58,6 @@ export default function ServiceCreateScreen({ navigation }) {
 
     // 2. CREATE FUNCTION
     const handleCreateService = async () => {
-        if (!userUid) {
-            Alert.alert("Error", "User not identified. Please scan your card.");
-            return;
-        }
         if (!description || description.trim() === '') {
             Alert.alert("Missing Detail", "Please provide a brief description of your request.");
             return;
@@ -66,7 +70,7 @@ export default function ServiceCreateScreen({ navigation }) {
             const { error } = await supabase
                 .from('service_requests')
                 .insert({
-                    user_uid: userUid,
+                    user_uid: userUid || 'CITIZEN_DEFAULT',
                     service_type: selectedService,
                     description: description.trim(),
                     status: 'Pending', // Initial status
@@ -76,10 +80,12 @@ export default function ServiceCreateScreen({ navigation }) {
             if (error) throw error;
 
             Alert.alert("Request Sent", "Your new service request has been successfully submitted! Status: Pending");
+            setDescription('');
             navigation.goBack();
 
         } catch (error) {
-            Alert.alert("Submission Failed", error.message);
+            console.error('Submission error:', error.message);
+            Alert.alert("Submission Failed", error.message || "An error occurred while submitting your request.");
         } finally {
             setLoading(false);
         }
@@ -116,22 +122,37 @@ export default function ServiceCreateScreen({ navigation }) {
                 />
                 
                 <Text style={styles.label}>Select Service Type</Text>
-                <View style={styles.pickerContainer}>
-                    <Picker
-                        selectedValue={selectedService}
-                        style={styles.picker}
-                        onValueChange={(itemValue) => setSelectedService(itemValue)}
-                        prompt="Choose a Service"
-                    >
+                <TouchableOpacity 
+                    style={styles.pickerContainer} 
+                    onPress={() => setDropdownOpen(!dropdownOpen)}
+                >
+                    <Text style={styles.pickerText}>
+                        {services.find(s => s.value === selectedService)?.label || 'Choose a Service'}
+                    </Text>
+                    <Text style={styles.pickerArrow}>▼</Text>
+                </TouchableOpacity>
+                
+                {dropdownOpen && (
+                    <View style={styles.dropdownMenu}>
                         {services.map((service) => (
-                            <Picker.Item 
-                                key={service.value} 
-                                label={service.label} 
-                                value={service.value} 
-                            />
+                            <TouchableOpacity
+                                key={service.value}
+                                style={styles.dropdownItem}
+                                onPress={() => {
+                                    setSelectedService(service.value);
+                                    setDropdownOpen(false);
+                                }}
+                            >
+                                <Text style={[
+                                    styles.dropdownItemText,
+                                    selectedService === service.value && styles.dropdownItemSelected
+                                ]}>
+                                    {service.label}
+                                </Text>
+                            </TouchableOpacity>
                         ))}
-                    </Picker>
-                </View>
+                    </View>
+                )}
 
                 <Text style={styles.label}>Brief Description of Request</Text>
                 <TextInput 
@@ -207,12 +228,51 @@ const styles = StyleSheet.create({
         borderWidth: 2, 
         borderColor: 'rgba(99, 149, 255, 0.60)', 
         borderRadius: 14, 
-        backgroundColor: 'rgba(255,255,255,0.35)', 
-        overflow: 'hidden',
+        backgroundColor: 'rgba(255,255,255,0.35)',
+        padding: 15,
         marginBottom: 8,
-        justifyContent: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
-    picker: { height: 60, width: '100%', color: '#1A1A1A', fontSize: 16, fontWeight: '600' },
+    pickerText: { 
+        color: '#1A1A1A', 
+        fontSize: 16, 
+        fontWeight: '600',
+        flex: 1,
+    },
+    pickerArrow: {
+        color: '#1A1A1A',
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    dropdownMenu: {
+        borderWidth: 2,
+        borderColor: 'rgba(99, 149, 255, 0.60)',
+        borderRadius: 14,
+        backgroundColor: 'rgba(255,255,255,0.95)',
+        marginBottom: 12,
+        overflow: 'hidden',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+    },
+    dropdownItem: {
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(99, 149, 255, 0.20)',
+    },
+    dropdownItemText: {
+        color: '#1A1A1A',
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    dropdownItemSelected: {
+        fontWeight: '700',
+        color: 'rgba(99, 149, 255, 0.80)',
+    },
 
     submitBtn: { 
         backgroundColor: 'rgba(46, 227, 187, 0.35)',

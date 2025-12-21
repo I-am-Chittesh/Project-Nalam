@@ -22,29 +22,39 @@ export default function ServiceLandScreen({ navigation }) {
                 .limit(1)
                 .single();
 
-            if (scanError) throw scanError;
+            if (scanError) {
+                console.error('Error fetching scan data:', scanError.message);
+                setLandRecords([]);
+                setLoading(false);
+                return;
+            }
 
             if (scanData && (scanData.uniqueid || scanData.uid)) {
                 const uid = scanData.uniqueid || scanData.uid;
                 setUserUid(uid);
                 setUserName(scanData.name || 'Citizen');
 
-                // Step B: Fetch all land records for this UID
+                // Step B: Fetch all land records for this UID (gracefully handle missing table)
                 const { data: records, error: recordsError } = await supabase
                     .from('land_records')
                     .select('*')
                     .eq('user_uid', uid)
                     .order('village_name', { ascending: true }); 
                 
-                if (recordsError) throw recordsError;
-                
-                setLandRecords(records);
+                // If table doesn't exist or no records, just use empty array
+                if (recordsError) {
+                    console.warn('Land records table not available:', recordsError.message);
+                    setLandRecords([]);
+                } else {
+                    setLandRecords(records || []);
+                }
             } else {
-                Alert.alert("Identification Required", "Please ensure your card is scanned to view land records.");
+                console.warn('No scan data available');
+                setLandRecords([]);
             }
         } catch (error) {
             console.error('Error fetching land data:', error.message);
-            Alert.alert("Database Error", "Could not load land records.");
+            setLandRecords([]);
         } finally {
             setLoading(false);
         }

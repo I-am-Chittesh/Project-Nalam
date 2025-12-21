@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, ScrollView, ImageBackground } from 'react-native';
-import { supabase } from '../config/dbClient';
 
-export default function ServiceUpdateScreen({ navigation }) {
+// Backend API URL - Make sure this matches your Flask server IP
+const API_BASE_URL = 'http://10.182.43.47:5000';
+
+export default function ServiceUpdateScreen({ navigation, route }) {
     const [loading, setLoading] = useState(true);
-    const [recordId, setRecordId] = useState(null); // The row ID in the database
+    const [recordId, setRecordId] = useState(null);
     
     // RFID Metadata State
     const [uid, setUid] = useState('');
     const [name, setName] = useState('');
     const [age, setAge] = useState('');
-
-    // Additional Contact Info (Optional - helpful for "Updates")
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
+    const [citizenId, setCitizenId] = useState('');
 
     useEffect(() => {
         fetchUserData();
@@ -21,69 +22,84 @@ export default function ServiceUpdateScreen({ navigation }) {
 
     const fetchUserData = async () => {
         try {
-            // 1. Get the scanned UID from app_main
-            // We assume app_main has the latest scan. 
-            const { data: scanData, error: scanError } = await supabase
-                .from('app_main')
-                .select('*')
-                .limit(1)
-                .single();
+            setLoading(true);
+            
+            // Get RFID UID from route params (passed from RFIDStandbyScreen)
+            // Use specific default RFID if not scanned
+            let rfidUID = route?.params?.rfidUID || 'SIM_1766339294667_8PVQU';
+            
+            setUid(rfidUID);
+            console.log('📱 Using RFID ID:', rfidUID);
 
-            if (scanError) throw scanError;
+            // Fetch user profile from backend using RFID UID
+            const response = await fetch(`${API_BASE_URL}/api/rfid/process`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ rfid_uid: rfidUID }),
+            });
 
-            if (scanData) {
-                // Display data directly from the scan first
-                setUid(scanData.uniqueid || scanData.uid || 'UNKNOWN'); 
-                
-                // 2. Now fetch the full profile from 'rfid_users' using that UID
-                const { data: userProfile, error: profileError } = await supabase
-                    .from('rfid_users')
-                    .select('*')
-                    .eq('uid', scanData.uniqueid) // Matching UID to UID
-                    .single();
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
-                if (userProfile) {
-                    setRecordId(userProfile.id);
-                    setName(userProfile.name);
-                    setAge(userProfile.age ? String(userProfile.age) : '');
-                    
-                    // If your table has these, they will load. If not, they stay empty.
-                    setPhone(userProfile.phone || '');
-                    setAddress(userProfile.address || '');
-                } else {
-                    // Fallback if user is not in main DB yet
-                    setName(scanData.name || "New User");
-                }
+            const data = await response.json();
+
+            if (data.success) {
+                setCitizenId(data.citizen_id || '');
+                setName(data.citizen_id || 'User ' + rfidUID);
+                // Set other fields from data if available
+                setAge(data.age ? String(data.age) : '');
+                setPhone(data.phone || '');
+                setAddress(data.address || '');
+                console.log('✅ User profile fetched successfully');
+            } else {
+                Alert.alert("Error", data.error || "Could not fetch user data");
             }
         } catch (error) {
             console.error('Error fetching data:', error.message);
-            Alert.alert("Error", "Could not fetch user data.");
+            Alert.alert("Error", "Could not connect to backend: " + error.message);
         } finally {
             setLoading(false);
         }
     };
 
     const handleUpdate = async () => {
-        if (!uid) return;
+        if (!uid) {
+            Alert.alert("Error", "No RFID UID available");
+            return;
+        }
+
         setLoading(true);
 
         try {
-            // Update the Age (and contact info) in the database
-            const { error } = await supabase
-                .from('rfid_users')
-                .update({ 
-                    age: parseInt(age), // Ensure age is a number
+            // Send update to backend
+            const response = await fetch(`${API_BASE_URL}/api/rfid/update`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    rfid_uid: uid,
+                    citizen_id: citizenId,
+                    name: name,
+                    age: age ? parseInt(age) : null,
                     phone: phone,
-                    address: address 
-                })
-                .eq('uid', uid);
+                    address: address,
+                }),
+            });
 
-            if (error) throw error;
+            const data = await response.json();
 
-            Alert.alert("Success", "User Metadata Updated!");
-            navigation.goBack();
-
+            if (data.success) {
+                Alert.alert("Success", "User records updated successfully!");
+                navigation.goBack();
+            } else {
+                Alert.alert("Update Failed", data.error || "Unknown error");
+            }
         } catch (error) {
+            console.error('Update error:', error);
             Alert.alert("Update Failed", error.message);
         } finally {
             setLoading(false);

@@ -22,29 +22,39 @@ export default function TaxationAndFilingsScreen({ navigation }) {
                 .limit(1)
                 .single();
 
-            if (scanError) throw scanError;
+            if (scanError) {
+                console.error('Error fetching scan data:', scanError.message);
+                setTaxRecords([]);
+                setLoading(false);
+                return;
+            }
 
             if (scanData && (scanData.uniqueid || scanData.uid)) {
                 const uid = scanData.uniqueid || scanData.uid;
                 setUserUid(uid);
                 setUserName(scanData.name || 'Citizen');
 
-                // Step B: Fetch all tax records for this UID
+                // Step B: Fetch all tax records for this UID (gracefully handle missing table)
                 const { data: records, error: recordsError } = await supabase
                     .from('tax_records')
                     .select('*')
                     .eq('user_uid', uid)
                     .order('assessment_year', { ascending: false }); // Show newest first
                 
-                if (recordsError) throw recordsError;
-                
-                setTaxRecords(records);
+                // If table doesn't exist or no records, just use empty array
+                if (recordsError) {
+                    console.warn('Tax records table not available:', recordsError.message);
+                    setTaxRecords([]);
+                } else {
+                    setTaxRecords(records || []);
+                }
             } else {
-                Alert.alert("Identification Required", "Please ensure your card is scanned to view tax records.");
+                console.warn('No scan data available');
+                setTaxRecords([]);
             }
         } catch (error) {
             console.error('Error fetching tax data:', error.message);
-            Alert.alert("Database Error", "Could not load tax information.");
+            setTaxRecords([]);
         } finally {
             setLoading(false);
         }

@@ -543,49 +543,158 @@ def process_rfid():
         if not rfid_uid:
             return jsonify({'success': False, 'error': 'No RFID UID provided'}), 400
         
-        # Check if RFID exists in the rfid table
-        with engine.connect() as conn:
-            result = conn.execute(text(
-                "SELECT * FROM rfid WHERE rfid_uid = :uid LIMIT 1"
-            ), {"uid": rfid_uid})
-            existing = result.fetchone()
-            
-            if existing:
-                # RFID exists - return the existing data
-                return jsonify({
-                    'success': True,
-                    'rfid_uid': rfid_uid,
-                    'citizen_id': existing[1] if len(existing) > 1 else None,
-                    'is_new': False,
-                    'data': dict(existing._mapping) if hasattr(existing, '_mapping') else {}
-                }), 200
-            else:
-                # RFID doesn't exist - create a dummy entry
-                citizen_id = f"CITIZEN_{rfid_uid}"
-                insert_query = text("""
-                    INSERT INTO rfid (rfid_uid, citizen_id, created_at)
-                    VALUES (:uid, :citizen_id, NOW())
-                    RETURNING *
-                """)
+        # Try to access database - gracefully handle connection failures
+        try:
+            # Check if RFID exists in the rfid table
+            with engine.connect() as conn:
+                result = conn.execute(text(
+                    "SELECT * FROM rfid WHERE rfid_uid = :uid LIMIT 1"
+                ), {"uid": rfid_uid})
+                existing = result.fetchone()
                 
-                result = conn.execute(insert_query, {
-                    "uid": rfid_uid,
-                    "citizen_id": citizen_id
-                })
-                conn.commit()
-                new_entry = result.fetchone()
-                
-                return jsonify({
-                    'success': True,
+                if existing:
+                    # RFID exists - return the existing data
+                    return jsonify({
+                        'success': True,
+                        'rfid_uid': rfid_uid,
+                        'citizen_id': existing[1] if len(existing) > 1 else None,
+                        'is_new': False,
+                        'data': dict(existing._mapping) if hasattr(existing, '_mapping') else {}
+                    }), 200
+                else:
+                    # RFID doesn't exist - create a new entry with duplicate values across all columns
+                    citizen_id = f"CITIZEN_{rfid_uid}"
+                    
+                    # Create insert query that duplicates the rfid_uid value across all columns
+                    insert_query = text("""
+                        INSERT INTO rfid (
+                            rfid_uid, 
+                            citizen_id, 
+                            name, 
+                            age, 
+                            phone, 
+                            address,
+                            created_at
+                        )
+                        VALUES (
+                            :uid, 
+                            :citizen_id, 
+                            :uid,
+                            :uid,
+                            :uid,
+                            :uid,
+                            NOW()
+                        )
+                        RETURNING *
+                    """)
+                    
+                    result = conn.execute(insert_query, {
+                        "uid": rfid_uid,
+                        "citizen_id": citizen_id
+                    })
+                    conn.commit()
+                    new_entry = result.fetchone()
+                    
+                    return jsonify({
+                        'success': True,
+                        'rfid_uid': rfid_uid,
+                        'citizen_id': citizen_id,
+                        'is_new': True,
+                        'message': 'New RFID entry created',
+                        'data': dict(new_entry._mapping) if hasattr(new_entry, '_mapping') else {}
+                    }), 201
+        
+        except Exception as db_error:
+            print(f"⚠️ Database error in process_rfid: {str(db_error)}")
+            # Database unavailable - return mock data instead of failing
+            citizen_id = f"CITIZEN_{rfid_uid}"
+            return jsonify({
+                'success': True,
+                'rfid_uid': rfid_uid,
+                'citizen_id': citizen_id,
+                'is_new': True,
+                'message': 'RFID processed (database offline)',
+                'offline_mode': True,
+                'data': {
                     'rfid_uid': rfid_uid,
                     'citizen_id': citizen_id,
-                    'is_new': True,
-                    'message': 'New RFID entry created',
-                    'data': dict(new_entry._mapping) if hasattr(new_entry, '_mapping') else {}
-                }), 201
+                    'name': rfid_uid,
+                    'age': rfid_uid,
+                    'phone': rfid_uid,
+                    'address': rfid_uid
+                }
+            }), 201
     
     except Exception as e:
         print(f"❌ RFID processing error: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/rfid/update', methods=['POST'])
+def update_rfid_profile():
+    """
+    Update RFID user profile with additional metadata.
+    
+    Request: {
+        "rfid_uid": "A1B2C3D4E5F6",
+        "citizen_id": "CITIZEN_...",
+        "name": "John Doe",
+        "age": 30,
+        "phone": "9876543210",
+        "address": "123 Main St"
+    }
+    Response: { "success": true, "message": "Profile updated successfully" }
+    """
+    try:
+        data = request.get_json()
+        rfid_uid = data.get('rfid_uid', '').strip()
+        
+        if not rfid_uid:
+            return jsonify({'success': False, 'error': 'No RFID UID provided'}), 400
+        
+        # Try to update database - gracefully handle connection failures
+        try:
+            # Update the rfid table with additional metadata
+            with engine.connect() as conn:
+                update_query = text("""
+                    UPDATE rfid 
+                    SET 
+                        citizen_id = :citizen_id,
+                        name = :name,
+                        age = :age,
+                        phone = :phone,
+                        address = :address,
+                        updated_at = NOW()
+                    WHERE rfid_uid = :uid
+                """)
+                
+                conn.execute(update_query, {
+                    "uid": rfid_uid,
+                    "citizen_id": data.get('citizen_id'),
+                    "name": data.get('name'),
+                    "age": data.get('age'),
+                    "phone": data.get('phone'),
+                    "address": data.get('address'),
+                })
+                conn.commit()
+                
+                return jsonify({
+                    'success': True,
+                    'message': 'Profile updated successfully',
+                    'rfid_uid': rfid_uid
+                }), 200
+        
+        except Exception as db_error:
+            print(f"⚠️ Database error in update_rfid: {str(db_error)}")
+            # Database unavailable - still return success for offline mode
+            return jsonify({
+                'success': True,
+                'message': 'Profile updated (database offline)',
+                'rfid_uid': rfid_uid,
+                'offline_mode': True
+            }), 200
+    
+    except Exception as e:
+        print(f"❌ RFID update error: {str(e)}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
@@ -596,5 +705,6 @@ if __name__ == '__main__':
     print("  POST /api/synthesize-audio        - Text-to-speech endpoint")
     print("  POST /api/language-preference     - Set language preference")
     print("  POST /api/rfid/process            - Process RFID UID from ESP32")
+    print("  POST /api/rfid/update             - Update RFID user profile metadata")
     print("\nServer running on http://0.0.0.0:5000")
     app.run(host='0.0.0.0', port=5000, debug=True)

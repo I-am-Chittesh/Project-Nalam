@@ -3,7 +3,7 @@ import time
 import json
 import pygame
 import speech_recognition as sr  # Using this for robust recording
-import google.generativeai as genai
+import google.genai as genai
 from sqlalchemy import create_engine, text
 from gtts import gTTS
 
@@ -12,8 +12,21 @@ from gtts import gTTS
 # SECTION 1: CONFIGURATION
 # ==============================================================================
 
-# 1. API Key
-os.environ["GEMINI_API_KEY"] = "AIzaSyCPbprUsUKuQmTHIYr7palqMCZvbTtsGhc"
+# 1. API Keys (primary + secondary for failover)
+#    Provide via env vars when possible to avoid hard-coding secrets.
+PRIMARY_GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY_PRIMARY") or os.environ.get("GEMINI_API_KEY") or "AIzaSyDqBrTJOy8bGnZToQmn-Xajp-h8vMj_8DQ"
+SECONDARY_GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY_SECONDARY") or "AIzaSyCpmLq58_7uqFQqHMLIVpc9YLSXEAscCCc"
+API_KEYS = [k for k in [PRIMARY_GEMINI_API_KEY, SECONDARY_GEMINI_API_KEY] if k]
+if not API_KEYS:
+    raise RuntimeError("No Gemini API keys provided. Set GEMINI_API_KEY or GEMINI_API_KEY_PRIMARY.")
+
+current_api_key_index = 0
+
+def _configure_genai(api_key: str):
+    os.environ["GOOGLE_API_KEY"] = api_key  # keep env in sync for any indirect usage
+    genai.configure(api_key=api_key)
+
+_configure_genai(API_KEYS[current_api_key_index])
 
 # 2. Database Connection
 DB_URL = "postgresql://postgres:admin_nalam@db.apmogbrgeasetudeumdx.supabase.co:5432/postgres"
@@ -60,8 +73,8 @@ class AudioSystem:
             self.mic = None
             self.mic_device_index = None
             self.mic_name = None
-        # Track the last detected language code from the user ('en','hi','ta')
-        self.last_language = None
+        # Track the last detected language code from the user ('en','hi','ta'); start with English
+        self.last_language = 'en'
 
     def record_audio_file(self, timeout=7, phrase_time_limit=20):
         """
@@ -109,7 +122,7 @@ class AudioSystem:
     def speak_warning(self, lang_code=None):
         """Speak the 5-second termination warning in the given language; if lang_code is None, speak in all three."""
         messages = {
-            'en': "AI mode will be terminated in 5 seconds as no input was given.",
+            'en': "AI Mode will be terminated in 5 seconds as no input was given.",
             'hi': "किसी इनपुट के न मिलने के कारण AI मोड 5 सेकंड में समाप्त कर दिया जाएगा।",
             'ta': "உள்ளீடு கிடைக்காமல் இருப்பதால் AI முறை 5 விநாடிகளில் முடிவடைய உள்ளது."
         }
@@ -200,6 +213,15 @@ def fetch_certificates(certificate_type: str = None):
 
     return "No certificates found for this user."
 
+def _lang_to_locale(lang_code: str) -> str:
+    """Map 2-letter language hint to a locale Google STT expects."""
+    return {
+        'en': 'en-IN',
+        'hi': 'hi-IN',
+        'ta': 'ta-IN',
+    }.get(lang_code, 'en-IN')
+
+
 def transcribe_audio_file(file_path: str, lang: str = 'en-IN'):
     """Transcribes a WAV file using SpeechRecognition + Google Web Speech API.
     Returns the transcribed text or None.
@@ -226,8 +248,6 @@ def transcribe_audio_file(file_path: str, lang: str = 'en-IN'):
 # SECTION 4: MULTIMODAL BRAIN
 # ==============================================================================
 
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-
 # Tools available for explicit calls from Python (only invoked when the decision step asks for them)
 tools = {
         "get_user_context": get_user_context,
@@ -251,13 +271,6 @@ Make a conservative decision: only set use_db=true when the user clearly request
 Keep responses protective of user privacy: never request or invent user identifiers.
 """
 
-decision_model = genai.GenerativeModel(
-    model_name='gemini-3-flash-preview',
-    tools=[],
-    system_instruction=decision_system,
-)
-decision_chat = decision_model.start_chat()
-
 # Response model: crafts a friendly, empathetic reply using any tool output you provide.
 response_system = """
 You are Nalam, a friendly multilingual kiosk assistant. Be warm, approachable and concise.
@@ -266,31 +279,51 @@ When given the user's transcription and optionally a 'tool_result' (database out
 Reply in the same language as 'language_code'. Keep phrasing simple and helpful for all users.
 """
 
-response_model = genai.GenerativeModel(
-    model_name='gemini-3-flash-preview',
-    tools=[],
-    system_instruction=response_system,
-)
-response_chat = response_model.start_chat()
 
+def send_with_model_fallback(system_instruction, prompt, primary_model='gemini-2.5-flash', fallback_model='gemini-2.5-flash-lite', tools_list=None):
+    """Send a prompt with API-key failover and model fallback."""
+    global current_api_key_index
+    tools_list = tools_list or []
+    last_error = None
 
-def send_with_model_fallback(chat_obj, system_instruction, prompt, primary_model='gemini-3-flash-preview', fallback_model='gemini-2-flash', tools_list=None):
-    """Send a prompt using the provided chat object; on 429/rate-limit, retry once with fallback model."""
+    def _attempt(key_idx: int, model_name: str):
+        _configure_genai(API_KEYS[key_idx])
+        model = genai.GenerativeModel(model_name=model_name, tools=tools_list, system_instruction=system_instruction)
+        chat = model.start_chat()
+        return chat.send_message(prompt)
+
+    # Try primary model with current key
     try:
-        return chat_obj.send_message(prompt)
+        res = _attempt(current_api_key_index, primary_model)
+        return res
     except Exception as e:
-        msg = str(e).lower()
-        if '429' in msg or 'rate' in msg or 'rate limit' in msg:
-            print(f"⚠️ Rate limit detected ({e}). Switching to fallback model: {fallback_model}")
-            try:
-                model = genai.GenerativeModel(model_name=fallback_model, tools=(tools_list or []), system_instruction=system_instruction)
-                new_chat = model.start_chat()
-                return new_chat.send_message(prompt)
-            except Exception as e2:
-                print(f"⚠️ Fallback model also failed: {e2}")
-                raise
-        else:
-            raise
+        last_error = e
+        print(f"⚠️ Primary model failed with key #{current_api_key_index + 1}: {e}")
+
+    # Try other key (if available) on the same model
+    for alt_idx in range(len(API_KEYS)):
+        if alt_idx == current_api_key_index:
+            continue
+        try:
+            res = _attempt(alt_idx, primary_model)
+            current_api_key_index = alt_idx
+            return res
+        except Exception as e:
+            last_error = e
+            print(f"⚠️ Alternate key #{alt_idx + 1} failed on primary model: {e}")
+
+    # Try fallback model using current key preference first, then the other key
+    for alt_idx in [current_api_key_index] + [i for i in range(len(API_KEYS)) if i != current_api_key_index]:
+        try:
+            res = _attempt(alt_idx, fallback_model)
+            current_api_key_index = alt_idx
+            return res
+        except Exception as e:
+            last_error = e
+            print(f"⚠️ Fallback model failed with key #{alt_idx + 1}: {e}")
+
+    # If everything failed, bubble up the last error
+    raise last_error
 
 # ==============================================================================
 # SECTION 5: MAIN LOOP
@@ -317,7 +350,7 @@ def run_kiosk():
                     # Issue warning at 25s of inactivity
                     if elapsed >= 25 and not warning_issued:
                         try:
-                            audio_sys.speak("Warning: AI mode will terminate in 5 seconds.", lang_code=audio_sys.last_language or 'en')
+                            audio_sys.speak("Warning: AI Mode will terminate in 5 seconds.", lang_code=audio_sys.last_language or 'en')
                         except Exception:
                             pass
                         warning_issued = True
@@ -346,7 +379,7 @@ def run_kiosk():
 
                 # We have audio; transcribe first and only treat as a valid command
                 # if transcription returns non-empty text. This ignores incidental/noise audio.
-                transcription = transcribe_audio_file(audio_file_path) or ""
+                transcription = transcribe_audio_file(audio_file_path, lang=_lang_to_locale(audio_sys.last_language or 'en')) or ""
                 if not transcription:
                     print("🔇 Audio detected but no valid speech command — ignoring audio input.")
                     try:
@@ -365,10 +398,11 @@ def run_kiosk():
                 # 3. DECISION STEP: Ask the decision model whether DB access is needed
                 decision_prompt = (
                     f"User transcription: {transcription}\n"
+                    f"Language preference (persist until user changes): {audio_sys.last_language}\n"
                     "Decide whether a database/tool call is needed. Respond with the JSON object described in the system instruction."
                 )
                 try:
-                    dec_res = send_with_model_fallback(decision_chat, decision_system, decision_prompt, tools_list=[])
+                    dec_res = send_with_model_fallback(decision_system, decision_prompt, tools_list=[])
                     dec_text = dec_res.text.strip()
                     # Clean code block wrappers if present
                     dec_text = dec_text.replace('```json', '').replace('```', '').strip()
@@ -378,7 +412,7 @@ def run_kiosk():
                         audio_sys.last_language = decision.get('language_code')
                 except Exception as e:
                     print(f"⚠️ Decision parsing error: {e} -- defaulting to no DB call")
-                    decision = {"use_db": False, "requested_tool": None, "tool_args": {}, "language_code": 'en'}
+                    decision = {"use_db": False, "requested_tool": None, "tool_args": {}, "language_code": audio_sys.last_language or 'en'}
 
                 tool_result = None
                 # If the decision says to use DB, call the requested tool exactly once
@@ -396,25 +430,26 @@ def run_kiosk():
                         tool_result = f"Requested tool '{tool_name}' not available."
 
                 # 4. Ask response model to craft a friendly reply, including any tool_result
+                target_lang = decision.get('language_code') or audio_sys.last_language or 'en'
                 final_prompt = (
                     f"User transcription: {transcription}\n"
                     f"Tool result: {json.dumps(tool_result)}\n"
-                    f"Language hint: {decision.get('language_code', 'en')}\n"
+                    f"Language preference (persist unless user switches): {target_lang}\n"
                     "Produce exactly one JSON object: {\"response_text\": ..., \"language_code\": ...}."
                 )
 
                 try:
-                    res = send_with_model_fallback(response_chat, response_system, final_prompt, tools_list=[])
+                    res = send_with_model_fallback(response_system, final_prompt, tools_list=[])
                     clean_text = res.text.replace("```json", "").replace("```", "").strip()
                     data = json.loads(clean_text)
                     # update last language from response if present
                     if isinstance(data, dict) and data.get('language_code'):
                         audio_sys.last_language = data.get('language_code')
-                    audio_sys.speak(data.get('response_text', ""), lang_code=data.get('language_code', 'en'))
+                    audio_sys.speak(data.get('response_text', ""), lang_code=data.get('language_code', audio_sys.last_language or 'en'))
                 except Exception as e:
                     print(f"⚠️ Response generation/parsing error: {e}")
                     # Fallback: speak transcription back in English
-                    audio_sys.speak(transcription or "Sorry, I couldn't process that." , lang_code='en')
+                    audio_sys.speak(transcription or "Sorry, I couldn't process that." , lang_code=audio_sys.last_language or 'en')
 
                 # Cleanup
                 os.remove(audio_file_path)

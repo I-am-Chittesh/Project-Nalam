@@ -31,7 +31,7 @@ export default function HomeScreen({ navigation }) {
                     onPress={() => navigation.navigate('RFIDStandby')}
                     activeOpacity={0.8}
                 >
-                    <Text style={styles.rfidButtonText}>📱 RFID</Text>
+                    <Text style={styles.rfidButtonText}>📱 Tap In</Text>
                 </TouchableOpacity>
             </ImageBackground>
         </View>

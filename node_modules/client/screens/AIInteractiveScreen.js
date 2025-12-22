@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, KeyboardAvoidingView, Platform, ImageBackground, ActivityIndicator, ScrollView, Modal } from 'react-native';
 import { Audio } from 'expo-av';
 
-const API_SERVER = 'http://localhost:5000';
+// Use your machine's IP address here. Replace with your actual IP (e.g., 192.168.x.x)
+// For development, you can find your IP by running: ipconfig (Windows) or ifconfig (Mac/Linux)
+const API_SERVER = 'http://192.168.1.100:5000'; // Change this to your machine's IP address
 
 export default function AIInteractiveScreen({ navigation }) {
   const [input, setInput] = useState('');
@@ -43,14 +45,21 @@ export default function AIInteractiveScreen({ navigation }) {
 
   async function checkServerHealth() {
     try {
-      const response = await fetch(`${API_SERVER}/api/health`);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      
+      const response = await fetch(`${API_SERVER}/api/health`, {
+        signal: controller.signal
+      });
+      clearTimeout(timeout);
+      
       if (response.ok) {
         setServerStatus('connected');
       } else {
         setServerStatus('error');
       }
     } catch (error) {
-      console.error('Server health check failed:', error);
+      // Silently fail - server is optional for the app to function
       setServerStatus('offline');
     }
   }
@@ -58,14 +67,19 @@ export default function AIInteractiveScreen({ navigation }) {
   async function playWelcomeAudio() {
     try {
       setAudioPlaying(true);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      
       const response = await fetch(`${API_SERVER}/api/synthesize-audio`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text: 'Welcome to Nalam AI. You can speak or type your message.',
           language: 'en'
-        })
+        }),
+        signal: controller.signal
       });
+      clearTimeout(timeout);
 
       if (!response.ok) {
         throw new Error(`Server error: ${response.status}`);
@@ -77,7 +91,8 @@ export default function AIInteractiveScreen({ navigation }) {
         await playAudioFromUri(data.uri);
       }
     } catch (error) {
-      console.error('Welcome audio error:', error);
+      // Silently fail - the app will still work without welcome audio
+      // This is important because the server may not be accessible from mobile devices
     } finally {
       setAudioPlaying(false);
     }
